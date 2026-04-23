@@ -1,58 +1,47 @@
 import re
+import pandas as pd
 
 def extract_urls(text):
     pattern = r'https?://[^\s]+'
     return re.findall(pattern, text)
 
 def get_domain(url):
-    # Grabs just the domain from a full URL
-    # "https://paypal.fakesite.com/login" → "paypal.fakesite.com"
     match = re.search(r'https?://([^\s/]+)', url)
     if match:
         return match.group(1)
     return ""
 
-def is_suspicious(url):
+def get_features(url,label):
     domain = get_domain(url)
-    reasons = []
-
-    # Check 1: IP address instead of domain name
-    if re.search(r'\d+\.\d+\.\d+\.\d+', domain):
-        reasons.append("uses raw IP address")
-
-    # Check 2: Too many hyphens (common in fake domains)
-    if domain.count('-') >= 2:
-        reasons.append("too many hyphens in domain")
-
-    # Check 3: URL is suspiciously long
-    if len(url) > 75:
-        reasons.append("URL is very long")
-
-    # Check 4: Known suspicious keywords
     keywords = ['login', 'verify', 'secure', 'account', 'update', 'confirm']
-    for word in keywords:
-        if word in url.lower():
-            reasons.append(f"contains suspicious keyword: '{word}'")
-            break
-    if url.startswith('http://'):
-        reasons.append('http website not https no encryption')
-    is_sus = len(reasons) > 0
-    return is_sus, reasons
+    suspicious_tlds = ('.tk', '.ml', '.ga', '.cf')
 
-# --- Test it ---
+
+    features = { #dictionary
+        'has_ip':          int(bool(re.search(r'\d+\.\d+\.\d+\.\d+', domain))),
+        'too_many_hyphens': int(domain.count('-') >= 2),
+        'is_long_url':     int(len(url) > 75),
+        'has_keyword':     int(any(word in url.lower() for word in keywords)),
+        'is_http':         int(url.startswith('http://')),
+        'has_suspicious_tld': int(url.endswith(suspicious_tlds)),
+        'label':            label, 
+    }
+    return features
+
+
+# --- Build a dataset from a list of URLs ---
 
 urls = [
-    "https://www.google.com",
-    "https://paypal-secure-login.fakesite.com/verify?id=123",
-    "http://192.168.1.1/account/update",
-    "https://amazon.com/orders",
-    "http://secure-account-verify.paypa1.com/login/confirm?user=you"
+    ("https://www.google.com",                                              0),
+    ("https://paypal-secure-login.fakesite.com/verify?id=123",              1),
+    ("http://192.168.1.1/account/update",                                   1),
+    ("https://amazon.com/orders",                                           0),
+    ("http://secure-account-verify.paypa1.com/login/confirm?user=you",      1),
 ]
 
-for url in urls:
-    flagged, reasons = is_suspicious(url)
-    status = "🚨 SUSPICIOUS" if flagged else "✅ OK"
-    print(f"{status} — {url}")
-    if reasons:
-        for r in reasons:
-            print(f"   → {r}")
+
+rows = [get_features(url, label) for url, label in urls]
+df = pd.DataFrame(rows)
+df.insert(0, 'url', [u for u, _ in urls])
+
+print(df.to_string(index=False))
