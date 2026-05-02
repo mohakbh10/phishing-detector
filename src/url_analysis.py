@@ -396,7 +396,52 @@ def predict_email(email_text, model):
 
         print(f"\n  FINAL VERDICT: {'🚨 PHISHING EMAIL' if any_suspicious else '✅ LEGIT EMAIL'}")
         print()
+#for backend api
+def analyze_email_api(email_text):
+    urls = extract_urls(email_text)
 
+    total_url_score = 0
+    url_results = []
+
+    for url in urls:
+        score, verdict, reasons = score_url(url)
+
+        features = get_features(url)
+        X_new = pd.DataFrame([features])
+
+        prediction = model.predict(X_new)[0]
+        probability = model.predict_proba(X_new)[0]
+
+        url_results.append({
+            "url": url,
+            "prediction": int(prediction),
+            "confidence": float(probability[prediction]),
+            "score": score,
+            "verdict": verdict,
+            "reasons": reasons
+        })
+
+        total_url_score += score
+
+    # 🔹 Fake for now (until UI supports real input)
+    attachment_score = 0
+    header_score = 0
+
+    total_score = total_url_score + attachment_score + header_score
+
+    # 🔹 Final classification
+    if total_score <= 40:
+        final_verdict = "SAFE"
+    elif total_score <= 80:
+        final_verdict = "SUSPICIOUS"
+    else:
+        final_verdict = "PHISHING"
+
+    return {
+        "final_verdict": final_verdict,
+        "total_score": total_score,
+        "url_results": url_results
+    }
 
 # ============================================================
 # PART 8 — TRAINING THE MODEL
