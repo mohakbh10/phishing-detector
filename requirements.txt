@@ -1,3 +1,7 @@
 pandas
 requests
 scikit-learn
+
+fastapi
+uvicorn
+pydantic
