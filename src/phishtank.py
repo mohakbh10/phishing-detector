@@ -1,3 +1,5 @@
+from urllib import response
+
 import requests
 
 def check_phishtank(url):
@@ -15,6 +17,8 @@ def check_phishtank(url):
 
     try:
         response = requests.post(api_url, data=data, headers=headers)
+        print(response.status_code)
+        print(response.text)
 
         if response.status_code != 200:
             return {

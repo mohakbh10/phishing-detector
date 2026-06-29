@@ -25,69 +25,89 @@ def get_features(url):
         'has_suspicious_tld': int(domain.endswith(SUSPICIOUS_TLDS)),
     }
 
-SHORTENERS = [
-    "bit.ly",
-    "tinyurl.com",
-    "t.co",
-    "goo.gl"
-]
-
 def score_url(url):
+
+    domain = get_domain(url)
+
+    if not domain:
+        return 0, "INVALID URL", ["Could not extract domain"]
 
     trusted, matched = is_whitelisted(url)
 
     if trusted:
-        return 0, "✅ Whitelisted", [f"Trusted domain: {matched}"]
+        return 0, "LOW RISK", [f"Trusted domain: {matched}"]
 
     features = get_features(url)
 
     score = 0
     reasons = []
 
-    if features['has_ip']:
-        score += 40
-        reasons.append("Raw IP address in URL")
+    SHORTENERS = [
+        "bit.ly",
+        "tinyurl.com",
+        "t.co",
+        "goo.gl"
+    ]
 
-    if features['has_suspicious_tld']:
-        score += 25
-        reasons.append("Suspicious TLD")
+    try:
 
-    if features['is_http']:
-        score += 20
-        reasons.append("Uses HTTP")
+        if features['has_ip']:
+            score += 40
+            reasons.append("Raw IP address")
 
-    if features['too_many_hyphens']:
-        score += 15
-        reasons.append("Too many hyphens")
+        if features['has_suspicious_tld']:
+            score += 25
+            reasons.append("Suspicious TLD")
 
-    if features['has_high_risk_keyword']:
-        score += 20
-        reasons.append("High-risk keyword")
-    
-    if any(short in domain for short in SHORTENERS):
-        score += 20
-        reasons.append("Shortened URL detected")
+        if features['is_http']:
+            score += 20
+            reasons.append("Uses HTTP")
 
-    elif features['has_medium_risk_keyword']:
-        score += 10
-        reasons.append("Medium-risk keyword")
+        if features['too_many_hyphens']:
+            score += 15
+            reasons.append("Too many hyphens")
 
-    if features['is_long_url']:
-        score += 10
-        reasons.append("Long URL")
+        if features['has_high_risk_keyword']:
+            score += 20
+            reasons.append("High-risk keyword")
 
-    flags = sum(features.values())
+        elif features['has_medium_risk_keyword']:
+            score += 10
+            reasons.append("Medium-risk keyword")
 
-    if flags >= 3:
-        bonus = (flags - 2) * 10
-        score += bonus
-        reasons.append(f"Combo bonus ({flags} flags)")
+        if features['is_long_url']:
+            score += 10
+            reasons.append("Long URL")
 
-    if score <= LOW_RISK_THRESHOLD:
-        verdict = "SAFE"
-    elif score <= MEDIUM_RISK_THRESHOLD:
+        if any(short in domain for short in SHORTENERS):
+            score += 20
+            reasons.append("Shortened URL")
+
+        digit_count = sum(c.isdigit() for c in domain)
+
+        if digit_count >= 5:
+            score += 20
+            reasons.append("Too many digits")
+
+        if len(domain) > 25:
+            score += 15
+            reasons.append("Long domain")
+
+        flags = sum(features.values())
+
+        if flags >= 3:
+            bonus = (flags - 2) * 10
+            score += bonus
+            reasons.append(f"Multiple risk indicators ({flags})")
+
+    except Exception:
+        return 0, "ERROR", ["Scoring engine failure"]
+
+    if score <= 30:
+        verdict = "LOW RISK"
+    elif score <= 60:
         verdict = "SUSPICIOUS"
     else:
-        verdict = "PHISHING"
+        verdict = "HIGH RISK"
 
     return score, verdict, reasons
