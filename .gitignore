@@ -1,3 +1,7 @@
-__pycache__/*.pyc
+__pycache__/
+*.pyc
 .env
-echo "data/PhiUSIIL.csv" >> .gitignore
+.DS_Store
+
+# Large dataset — too big for git, see README for download instructions
+data/PhiUSIIL.csv
