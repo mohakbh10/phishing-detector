@@ -1,63 +1,63 @@
 
 
-import os
 import requests
-
 from src.utils import get_domain
-
-# ============================================================
-# URLSCAN CONFIG
-# ============================================================
-
-API_KEY = os.environ.get("URLSCAN_API_KEY")
-
-# ============================================================
-# URLSCAN CHECK
-# ============================================================
+from src.config import URLSCAN_API_KEY, URLSCAN_TIMEOUT
 
 def check_urlscan(url):
-
     domain = get_domain(url)
 
-    # If domain extraction fails
     if not domain:
-
         return {
             "available": False,
             "malicious": None,
             "results_found": 0,
             "error": "Could not extract domain"
         }
-    if not API_KEY:
+
+    if not URLSCAN_API_KEY:
         return {
             "available": False,
             "malicious": None,
             "results_found": 0,
-            "error": "URLSCAN_API_KEY not set in environment"
+            "error": "URLSCAN_API_KEY not configured"
         }
-    
-    endpoint = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
+    endpoint = "https://urlscan.io/api/v1/search/"
     headers = {
-        "API-Key": API_KEY
+        "API-Key": URLSCAN_API_KEY,
+        "Content-Type": "application/json"
     }
-
     params = {
-        "q": f"domain:{domain}"
+        "q": f"domain:{domain}",
+        "size": 10
     }
 
     try:
-
         response = requests.get(
             endpoint,
             headers=headers,
             params=params,
-            timeout=5
+            timeout=URLSCAN_TIMEOUT
         )
 
-        # API failure
-        if response.status_code != 200:
+        if response.status_code in [401, 403]:
+            return {
+                "available": False,
+                "malicious": None,
+                "results_found": 0,
+                "error": "Invalid or unauthorized urlscan.io API Key"
+            }
+        
+        if response.status_code == 429:
+             return {
+                "available": False,
+                "malicious": None,
+                "results_found": 0,
+                "error": "urlscan.io API rate limit exceeded"
+            }
 
+        if response.status_code != 200:
             return {
                 "available": False,
                 "malicious": None,
@@ -66,20 +66,13 @@ def check_urlscan(url):
             }
 
         data = response.json()
-
         results = data.get("results", [])
-
         malicious = False
 
-        # Check every result
         for result in results:
-
             verdicts = result.get("verdicts", {})
-
             overall = verdicts.get("overall", {})
-
             if overall.get("malicious", False):
-
                 malicious = True
                 break
 
@@ -91,25 +84,20 @@ def check_urlscan(url):
         }
 
     except requests.exceptions.Timeout:
-
         return {
             "available": False,
             "malicious": None,
             "results_found": 0,
             "error": "urlscan request timed out"
         }
-
-    except requests.exceptions.ConnectionError:
-
+    except requests.exceptions.RequestException as e:
         return {
             "available": False,
             "malicious": None,
             "results_found": 0,
-            "error": "Could not connect to urlscan"
+            "error": f"Connection error: {str(e)}"
         }
-
     except Exception as e:
-
         return {
             "available": False,
             "malicious": None,

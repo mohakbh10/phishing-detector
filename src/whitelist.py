@@ -7,9 +7,11 @@ def is_whitelisted(url):
     if not domain:
         return False, None
 
+    # Handle port in domain
     domain = domain.split(':')[0]
 
     for trusted in WHITELISTED_DOMAINS:
+        # Secure matching: exactly the domain or a subdomain
         if domain == trusted or domain.endswith('.' + trusted):
             return True, trusted
 

@@ -57,11 +57,11 @@ def score_url(url):
 
         if features['has_suspicious_tld']:
             score += 25
-            reasons.append("Suspicious TLD")
+            reasons.append(f"Suspicious TLD")
 
         if features['is_http']:
             score += 20
-            reasons.append("Uses HTTP")
+            reasons.append("Uses HTTP (Insecure)")
 
         if features['too_many_hyphens']:
             score += 15
