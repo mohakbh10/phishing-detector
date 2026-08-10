@@ -30,3 +30,13 @@ REDIRECT_MAX_HOPS = int(os.getenv("REDIRECT_MAX_HOPS", "8"))
 REDIRECT_TIMEOUT = float(os.getenv("REDIRECT_TIMEOUT", "3"))
 GOOGLE_SAFE_BROWSING_API_KEY = os.getenv("GOOGLE_SAFE_BROWSING_API_KEY")
 GOOGLE_SAFE_BROWSING_TIMEOUT = float(os.getenv("GOOGLE_SAFE_BROWSING_TIMEOUT", "5"))
+
+
+def _cors_origins() -> list[str]:
+    """Return explicitly configured browser origins; never default to a wildcard."""
+    default = "http://localhost:3000,http://127.0.0.1:3000"
+    configured = os.getenv("CORS_ALLOWED_ORIGINS", default)
+    return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip().startswith(("http://", "https://"))]
+
+
+CORS_ALLOWED_ORIGINS = _cors_origins()

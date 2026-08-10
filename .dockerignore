@@ -1,0 +1,9 @@
+.git
+.env
+.venv
+venv
+__pycache__
+.pytest_cache
+*.pyc
+.DS_Store
+src/models/decision_tree.pkl

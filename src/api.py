@@ -1,13 +1,13 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
 
 from src.utils import extract_urls
 from src.email_parser import parse_eml
 from src.header_analysis import analyze_headers
 from src.attachment_analysis import analyze_attachments
 from src.analyzer import analyze_url_full, aggregate_risk
+from src.config import CORS_ALLOWED_ORIGINS
 
 app = FastAPI(title="Phishing Detector API")
 
@@ -17,7 +17,7 @@ app = FastAPI(title="Phishing Detector API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

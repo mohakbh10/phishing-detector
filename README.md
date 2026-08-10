@@ -51,6 +51,20 @@ uvicorn src.api:app --reload
 
 The API listens at `http://127.0.0.1:8000` and allows the local Next.js frontend on ports `3000`.
 
+## Deploy with Docker
+
+The included `Dockerfile` installs dependencies and trains the Git-ignored model inside the image from the local PhiUSIIL CSV. Build it from this backend directory, where `data/PhiUSIIL.csv` is present:
+
+```bash
+docker build -t phishing-detector-api .
+docker run --rm -p 8000:8000 \
+  -e GOOGLE_SAFE_BROWSING_API_KEY='your_key_here' \
+  -e CORS_ALLOWED_ORIGINS='https://your-frontend.example.com' \
+  phishing-detector-api
+```
+
+For a hosted deployment, configure the same two variables in the provider dashboard. Never add `.env` to a container image, source control, or frontend variables. Use the deployed API URL in the frontend's `NEXT_PUBLIC_API_URL` setting.
+
 ## API
 
 | Method | Endpoint | Purpose |
