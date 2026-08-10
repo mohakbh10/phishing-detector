@@ -20,12 +20,14 @@ def analyze_url_full(url):
         ml = predict_url(url)
         if threat_intelligence.get("malicious"):
             score = max(score, 85); verdict = "HIGH RISK"; reasons.append("Flagged by Google Safe Browsing")
-        elif not trusted and ml.get("available") and ml.get("phishing_probability", 0) >= .85 and score < 31:
-            score = max(score, 35); verdict = "SUSPICIOUS"; reasons.append("ML model reports a high phishing probability")
         elif trusted:
             score, verdict = 0, "LOW RISK"
         else:
             verdict = "HIGH RISK" if score > 60 else "SUSPICIOUS" if score > 30 else "LOW RISK"
+            # ML remains an explainable supporting signal. A URL-only model is
+            # not allowed to change a low-heuristic URL's final verdict alone.
+            if ml.get("available") and ml.get("phishing_probability", 0) >= .85 and score > 30:
+                reasons.append("ML model supports the heuristic risk assessment")
         return {"url":url,"score":min(int(score),100),"verdict":verdict,"reasons":reasons,"redirect_chain":chain,"redirect_error":redirect_error,"threat_intelligence":threat_intelligence,"google_safe_browsing":threat_intelligence,"ml":ml}
     except Exception as exc:
         unavailable={"available":False,"malicious":None,"error":"Analysis component unavailable"}

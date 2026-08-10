@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 from src.attachment_analysis import analyze_attachments
+from src.analyzer import analyze_url_full
 from src.google_safe_browsing import check_google_safe_browsing
 from src.ml.predictor import predict_url
 from src.redirects import get_redirect_chain
@@ -44,5 +45,16 @@ class SecurityTests(unittest.TestCase):
         self.assertTrue(result['available'])
         self.assertGreaterEqual(result['phishing_probability'], 0)
         self.assertLessEqual(result['phishing_probability'], 1)
+
+    @patch('src.analyzer.predict_url')
+    @patch('src.analyzer.check_google_safe_browsing')
+    @patch('src.analyzer.get_redirect_chain')
+    def test_ml_alone_does_not_escalate_a_low_heuristic_url(self, redirect, threat, predictor):
+        redirect.return_value = (['https://example.org'], None)
+        threat.return_value = {'available': True, 'malicious': False, 'error': None}
+        predictor.return_value = {'available': True, 'prediction': 'PHISHING', 'phishing_probability': .99, 'legitimate_probability': .01, 'error': None}
+        result = analyze_url_full('https://example.org')
+        self.assertEqual(result['verdict'], 'LOW RISK')
+        self.assertEqual(result['score'], 0)
 
 if __name__ == '__main__': unittest.main()
