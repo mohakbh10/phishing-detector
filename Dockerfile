@@ -14,4 +14,4 @@ COPY . ./
 RUN python -m src.ml.train_model
 
 EXPOSE 8080
-CMD ["sh", "-c", "uvicorn src.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn src.api:app --host 0.0.0.0 --port ${PORT:-8080}"]
