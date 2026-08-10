@@ -1,0 +1,81 @@
+{
+  "dataset": "PhiUSIIL.csv",
+  "rows": 235795,
+  "features": [
+    "URLLength",
+    "DomainLength",
+    "IsDomainIP",
+    "TLDLength",
+    "NoOfSubDomain",
+    "HasObfuscation",
+    "NoOfObfuscatedChar",
+    "ObfuscationRatio",
+    "NoOfLettersInURL",
+    "LetterRatioInURL",
+    "NoOfDegitsInURL",
+    "DegitRatioInURL",
+    "NoOfEqualsInURL",
+    "NoOfQMarkInURL",
+    "NoOfAmpersandInURL",
+    "NoOfOtherSpecialCharsInURL",
+    "SpacialCharRatioInURL",
+    "IsHTTPS"
+  ],
+  "label_mapping": {
+    "0": "PHISHING",
+    "1": "LEGITIMATE"
+  },
+  "split": {
+    "train": 165056,
+    "validation": 35369,
+    "test": 35370
+  },
+  "validation": {
+    "accuracy": 0.994995617631259
+  },
+  "test": {
+    "accuracy": 0.9942889454339836,
+    "precision": 0.9952267303102625,
+    "recall": 0.9914146083740589,
+    "f1": 0.9933170118441077,
+    "roc_auc": 0.9973899627851006,
+    "confusion_matrix": [
+      [
+        20156,
+        72
+      ],
+      [
+        130,
+        15012
+      ]
+    ],
+    "false_negatives": 130,
+    "classification_report": {
+      "LEGITIMATE": {
+        "precision": 0.9935916395543725,
+        "recall": 0.9964405774174412,
+        "f1-score": 0.9950140692106433,
+        "support": 20228.0
+      },
+      "PHISHING": {
+        "precision": 0.9952267303102625,
+        "recall": 0.9914146083740589,
+        "f1-score": 0.9933170118441077,
+        "support": 15142.0
+      },
+      "accuracy": 0.9942889454339836,
+      "macro avg": {
+        "precision": 0.9944091849323176,
+        "recall": 0.9939275928957501,
+        "f1-score": 0.9941655405273755,
+        "support": 35370.0
+      },
+      "weighted avg": {
+        "precision": 0.9942916266684717,
+        "recall": 0.9942889454339836,
+        "f1-score": 0.9942875540100754,
+        "support": 35370.0
+      }
+    }
+  }
+}

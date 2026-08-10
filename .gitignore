@@ -1,7 +1,9 @@
-__pycache__/
-*.pyc
 .env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
 .DS_Store
-
-# Large dataset — too big for git, see README for download instructions
-data/PhiUSIIL.csv
+data/*.csv
+src/models/*.joblib

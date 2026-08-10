@@ -2,7 +2,7 @@ from src.utils import extract_urls, get_domain
 from src.whitelist import is_whitelisted
 from src.scoring import score_url
 from src.redirects import get_redirect_chain
-from src.urlscan import check_urlscan
+from src.google_safe_browsing import check_google_safe_browsing
 from src.header_analysis import analyze_headers
 from src.attachment_analysis import analyze_attachments
 from src.analyzer import analyze_url_full, aggregate_risk
@@ -44,12 +44,12 @@ def run_tests():
     print(f"Github Redirect Chain: {chain} (Error: {err})")
     assert len(chain) >= 1
 
-    # 5. urlscan
-    print("\n--- 5. Testing urlscan.io ---")
-    scan_res = check_urlscan("https://google.com")
-    print("urlscan.io response:", scan_res)
+    # 5. Google Safe Browsing graceful configuration failure
+    print("\n--- 5. Testing Google Safe Browsing ---")
+    scan_res = check_google_safe_browsing("https://google.com")
+    print("Google Safe Browsing response:", scan_res)
     assert scan_res["available"] is False
-    assert "not configured" in scan_res["error"]
+    assert "not configured" in scan_res["error"].lower()
 
     # 6. Header Analysis
     print("\n--- 6. Testing Header Analysis ---")

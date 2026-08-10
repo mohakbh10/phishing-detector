@@ -49,7 +49,8 @@ def health():
             "url_heuristics": "online",
             "header_analysis": "online",
             "attachment_analysis": "online",
-            "threat_intelligence": "online"
+            "threat_intelligence": "configured-or-graceful-degradation",
+            "ml": "configured-or-graceful-degradation"
         }
     }
 
@@ -137,5 +138,5 @@ async def analyze_eml_file(file: UploadFile = File(...)):
             "overall_verdict": overall_verdict,
             "reasons": overall_reasons
         }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to safely parse .eml: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Failed to safely parse .eml")

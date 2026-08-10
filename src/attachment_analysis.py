@@ -23,9 +23,11 @@ def analyze_attachments(attachments):
         risk = "LOW RISK"
         reason = None
         
-        if extension in SUSPICIOUS_EXTENSIONS:
+        lower_name = filename.lower()
+        double_extension = any(lower_name.endswith(f".{benign}{dangerous}") for benign in ("pdf", "doc", "docx", "xls", "xlsx", "jpg", "png", "txt") for dangerous in SUSPICIOUS_EXTENSIONS)
+        if extension in SUSPICIOUS_EXTENSIONS or double_extension:
             risk = "SUSPICIOUS"
-            reason = "Suspicious file extension"
+            reason = "Suspicious double extension" if double_extension else "Suspicious file extension"
             total_risk_score += 25
 
         # Calculate SHA-256 safely
@@ -45,4 +47,3 @@ def analyze_attachments(attachments):
         "attachment_results": results,
         "attachment_risk_score": min(total_risk_score, 100)
     }
-
