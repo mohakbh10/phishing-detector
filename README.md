@@ -2,6 +2,12 @@
 
 An explainable FastAPI backend for assessing phishing risk in URLs, pasted email text, and `.eml` messages. It combines deterministic security checks with a URL-only machine-learning signal and Google Safe Browsing.
 
+## Live demo
+
+- **Web app:** [https://phishguardbymohak.vercel.app/]
+- **API health:** [https://phishing-detector-production-2b6e.up.railway.app/health](https://phishing-detector-production-2b6e.up.railway.app/health)
+- **Interactive API docs:** [https://phishing-detector-production-2b6e.up.railway.app/docs](https://phishing-detector-production-2b6e.up.railway.app/docs)
+
 ## Architecture
 
 ```mermaid
